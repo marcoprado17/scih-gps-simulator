@@ -1,7 +1,7 @@
 {
     "contractAddress": "0xc5595653DD022Db25711E875C9A49BDB258156C1",
     "nUsers": 5,
-    "sendLocationPeriodInMiliseconds": 1000,
+    "sendLocationPeriodInMiliseconds": 5000,
     "minInitialLat": 1.2,
     "minInitialLong": 1.2,
     "maxInitialLat": 1.2,
