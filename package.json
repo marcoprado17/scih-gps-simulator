@@ -1,0 +1,29 @@
+{
+  "name": "scife-gps-simulator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "run.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "simulation": "node download_contract_files && node run.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marcoprado17/scife-gps-simulator.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/marcoprado17/scife-gps-simulator/issues"
+  },
+  "homepage": "https://github.com/marcoprado17/scife-gps-simulator#readme",
+  "dependencies": {
+    "sync-request": "^6.0.0",
+    "truffle-hdwallet-provider": "0.0.3",
+    "web3": "^1.0.0-beta.26"
+  },
+  "devDependencies": {
+    "babel-preset-env": "^1.7.0",
+    "babel-register": "^6.26.0"
+  }
+}

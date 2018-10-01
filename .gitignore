@@ -1,0 +1,4 @@
+node_modules
+ethereum/build/*
+!ethereum/build/.gitkeep
+secrets.json
