@@ -20,8 +20,9 @@ setTimeout(() => {
     setInterval(async () => {
         const accounts = await myWeb3.eth.getAccounts();
         let thisTransaction = nTransactions++;
-        console.log(`Sending transaction ${thisTransaction} for user ${user_idx} (${accounts[0]})`);
-        smartCarInsuranceContract.methods.addGpsLocation("1", Math.random().toString()).send(
+        const currentUnixTimestamp = Math.floor(Date.now()/1000);
+        console.log(`Sending transaction ${thisTransaction} for user ${user_idx} (${accounts[0]}) at ${currentUnixTimestamp}`);
+        smartCarInsuranceContract.methods.pushGpsData(currentUnixTimestamp, "Abc").send(
             {
                 gas: '1000000',
                 from: accounts[0]

@@ -5,7 +5,8 @@
   "main": "run.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "simulation": "node download_contract_files && node run.js"
+    "simulation": "node download_contract_files && node run.js",
+    "getData": "node download_contract_files && node get_data.js"
   },
   "repository": {
     "type": "git",
