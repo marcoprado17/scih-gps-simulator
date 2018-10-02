@@ -18,6 +18,12 @@ const smartCarInsuranceContract = new myWeb3.eth.Contract(JSON.parse(SmartCarIns
     const address = accounts[0];
     console.log(accounts);
     console.log(address);
-    let r = await smartCarInsuranceContract.methods.gpsLocationsByUserAddress(address, 0).call();
-    console.log(r);
+    let length = await smartCarInsuranceContract.methods.getLengthOfGpsData(address).call();
+    console.log(length);
+    data = [];
+    for(let i = 0; i < length; i++) {
+        let gpsData = await smartCarInsuranceContract.methods.gpsDataByUserAddress(address, i).call();
+        data.push(gpsData);
+    }
+    console.log(data);
 }());
