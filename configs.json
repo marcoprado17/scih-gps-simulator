@@ -1,10 +1,10 @@
 {
     "contractAddress": "0x0215B2eDa86dA2174Bc1171BC730A154381a8601",
-    "nUsers": 5,
-    "sendLocationPeriodInMiliseconds": 30000,
-    "minInitialLat": 1.2,
-    "minInitialLong": 1.2,
-    "maxInitialLat": 1.2,
-    "maxInitialLong": 1.2,
-    "maxCoordinateDeltaBetweenCalls": 0.01
+    "nUsers": 2,
+    "sendLocationPeriodInMiliseconds": 3000,
+    "minInitialLat": -23.603244,
+    "minInitialLong": -46.679381,
+    "maxInitialLat": -23.504324,
+    "maxInitialLong": -46.561788,
+    "maxCoordinateDeltaBetweenCalls": 0.001
 }
