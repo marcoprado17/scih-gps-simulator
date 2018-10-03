@@ -53,7 +53,6 @@ setTimeout(() => {
         currentLat += (Math.random() > 0.5 ? 1 : -1)*Math.random()*configs.maxCoordinateDeltaBetweenCalls;
         currentLong += (Math.random() > 0.5 ? 1 : -1)*Math.random()*configs.maxCoordinateDeltaBetweenCalls;
 
-        // TODO: Obter a child baseado no unix datetime
         const i = currentUnixTimestamp-946684800;
         const key = gpsHdwallet.deriveChild(i).getWallet().getPrivateKey();
 
