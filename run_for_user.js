@@ -26,12 +26,6 @@ let currentLat = configs.minInitialLat + (configs.maxInitialLat-configs.minIniti
 let currentLong = configs.minInitialLong + (configs.maxInitialLong-configs.minInitialLong)*Math.random();
 
 const gpsHdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(configs.gpsMnemonic));
-// const wallet = gpsHdwallet.deriveChild(0).getWallet();
-// console.log(wallet.getPrivateKey());
-// console.log(wallet.getPublicKey());
-// console.log(wallet.getAddress());
-// console.log();
-// console.log(gpsHdwallet.derivePath("m/0/0").getWallet());
 
 function sendSigned(txData,  cb) {
     const transaction = new Tx(txData);
@@ -56,8 +50,9 @@ setTimeout(() => {
         const i = currentUnixTimestamp-946684800;
         const key = gpsHdwallet.deriveChild(i).getWallet().getPrivateKey();
 
-        var cipher = crypto.createCipher("aes256", key)
-        var encryptedGpsData = cipher.update(JSON.stringify(latLongData),'utf8','hex');
+        const cipher = crypto.createCipher("aes256", key)
+        let encryptedGpsData = cipher.update(JSON.stringify(latLongData),'utf8','hex');
+        encryptedGpsData += cipher.final('hex');
 
         const data = smartCarInsuranceContract.methods.pushGpsData(currentUnixTimestamp, encryptedGpsData).encodeABI();
 
