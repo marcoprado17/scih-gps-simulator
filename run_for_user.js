@@ -54,7 +54,8 @@ setTimeout(() => {
         currentLong += (Math.random() > 0.5 ? 1 : -1)*Math.random()*configs.maxCoordinateDeltaBetweenCalls;
 
         // TODO: Obter a child baseado no unix datetime
-        const key = gpsHdwallet.deriveChild(thisTransaction).getWallet().getPrivateKey();
+        const i = currentUnixTimestamp-946684800;
+        const key = gpsHdwallet.deriveChild(i).getWallet().getPrivateKey();
 
         var cipher = crypto.createCipher("aes256", key)
         var encryptedGpsData = cipher.update(JSON.stringify(latLongData),'utf8','hex');
