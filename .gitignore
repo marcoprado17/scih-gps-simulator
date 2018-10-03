@@ -2,3 +2,4 @@ node_modules
 ethereum/build/*
 !ethereum/build/.gitkeep
 secrets.json
+temp_reports/*.json

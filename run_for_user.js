@@ -3,10 +3,11 @@ const secrets = require('./secrets');
 const HDWalletProvider = require('truffle-hdwallet-provider');
 const SmartCarInsuranceContract = require('./ethereum/build/SmartCarInsuranceContract.json');
 const configs = require('./configs');
-const Tx = require('ethereumjs-tx')
+const Tx = require('ethereumjs-tx');
 const bip39 = require("bip39");
 const hdkey = require('ethereumjs-wallet/hdkey');
 const crypto = require('crypto');
+const fs = require('fs');
 
 const user_idx = parseInt(process.argv[2]);
 
@@ -27,51 +28,145 @@ let currentLong = configs.minInitialLong + (configs.maxInitialLong-configs.minIn
 
 const gpsHdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(configs.gpsMnemonic));
 
-function sendSigned(txData,  cb) {
-    const transaction = new Tx(txData);
-    transaction.sign(privKeyBuffer);
-    const serializedTx = transaction.serialize().toString('hex');
-    web3.eth.sendSignedTransaction('0x' + serializedTx, cb);
-}
+let report = {};
+report.configs = configs;
+report.data = [];
 
-setTimeout(() => {
-    setInterval(async () => {
-        let thisTransaction = nTransactions++;
+let initialNonce = 0;
 
-        const currentUnixTimestamp = Math.floor(Date.now()/1000);
-        console.log(`Sending transaction ${thisTransaction} for user ${user_idx} (${accountAddress}) at ${currentUnixTimestamp}`);
-        latLongData = {
-            lat: currentLat,
-            long: currentLong
-        }
-        currentLat += (Math.random() > 0.5 ? 1 : -1)*Math.random()*configs.maxCoordinateDeltaBetweenCalls;
-        currentLong += (Math.random() > 0.5 ? 1 : -1)*Math.random()*configs.maxCoordinateDeltaBetweenCalls;
+let decodeHexStringToByteArray = function(hexString) {
+    // console.log(hexString);
+    var result = [];
+    while (hexString.length >= 2) { 
+        result.push(parseInt(hexString.substring(0, 2), 16));
+        hexString = hexString.substring(2, hexString.length);
+    }
+    // console.log(result);
+    return result;
+};
 
-        const i = currentUnixTimestamp-946684800;
-        const key = gpsHdwallet.deriveChild(i).getWallet().getPrivateKey();
+(async function(){
+    initialNonce = await web3.eth.getTransactionCount(accountAddress);
 
-        const cipher = crypto.createCipher("aes256", key)
-        let encryptedGpsData = cipher.update(JSON.stringify(latLongData),'utf8','hex');
-        encryptedGpsData += cipher.final('hex');
+    console.log(`initialNonce: ${initialNonce}`);
 
-        const data = smartCarInsuranceContract.methods.pushGpsData(currentUnixTimestamp, encryptedGpsData).encodeABI();
+    setTimeout(() => {
+        setInterval(async () => {
+            let thisTransaction = nTransactions++;
+    
+            const currentUnixTimestamp = Math.floor(Date.now()/1000);
+    
+            latLongData = {
+                lat: currentLat,
+                long: currentLong
+            }
+            currentLat += (Math.random() > 0.5 ? 1 : -1)*Math.random()*configs.maxCoordinateDeltaBetweenCalls;
+            currentLong += (Math.random() > 0.5 ? 1 : -1)*Math.random()*configs.maxCoordinateDeltaBetweenCalls;
+    
+            let thisLat = currentLat;
+            let thisLong = currentLong;
 
-        // TODO: Encriptar latLongData
-        // get the number of transactions sent so far so we can create a fresh nonce
-        web3.eth.getTransactionCount(accountAddress).then(txCount => {
+            const i = currentUnixTimestamp-946684800;
+            const key = gpsHdwallet.deriveChild(i).getWallet().getPrivateKey();
+    
+            const cipher = crypto.createCipher("aes256", key)
+            let encryptedGpsData = cipher.update(JSON.stringify(latLongData),'utf8','hex');
+            encryptedGpsData += cipher.final('hex');
+    
+            const data = smartCarInsuranceContract.methods.pushGpsData(currentUnixTimestamp, encryptedGpsData).encodeABI();
+            let dataAsByteArray = decodeHexStringToByteArray(data.substr(2));
+            let nNonZeroBytes = 0;
+            let nZeroBytes = 0;
+            dataAsByteArray.map((byte) => {
+                if(byte == 0){
+                    nZeroBytes++;
+                }
+                else{
+                    nNonZeroBytes++;
+                }
+            });
+            // console.log(`nZeroBytes: ${nZeroBytes}`);
+            // console.log(`nNonZeroBytes: ${nNonZeroBytes}`);
+
+            const nonce = initialNonce + thisTransaction;
+    
             const txData = {
-                nonce: web3.utils.toHex(txCount),
-                gasLimit: web3.utils.toHex(250000),
+                nonce: web3.utils.toHex(nonce),
+                gasLimit: web3.utils.toHex(1000000),
                 gasPrice: web3.utils.toHex(1e9), // 1 Gwei
                 to: configs.contractAddress,
                 from: accountAddress,
                 data: data
-            }
-            // fire away!
-            sendSigned(txData, function(err, result) {
-                if (err) return console.log('error', err);
-                console.log('sent', result);
-            });
-        })
-    }, configs.sendLocationPeriodInMiliseconds);
-}, Math.random() * configs.sendLocationPeriodInMiliseconds);
+            };
+
+            // console.log(txData);
+    
+            const transaction = new Tx(txData);
+            transaction.sign(privKeyBuffer);
+            const serializedTx = transaction.serialize().toString('hex');
+            const sendTxUnixTimestamp = Math.floor(Date.now()/1000);
+            web3.eth.sendSignedTransaction('0x' + serializedTx)
+                .once('transactionHash', function(hash) {
+                })
+                .once('error', function(err) {
+                    let msg = "";
+                    msg += `Sending transaction ${thisTransaction}/${nonce} for user ${user_idx} (${accountAddress}) at ${currentUnixTimestamp}\n`;
+                    msg += `ERROR: ${err.message}`;
+                    console.log(msg);
+
+                    const finishTxUnixTimestamp = Math.floor(Date.now()/1000);
+                    report.data.push({
+                        idx: thisTransaction,
+                        status: "ERROR",
+                        message: err.message,
+                        creationUnixTimestamp: currentUnixTimestamp,
+                        lat: thisLat,
+                        long: thisLong,
+                        encryptedGpsData: encryptedGpsData,
+                        sendTxUnixTimestamp: sendTxUnixTimestamp,
+                        finishTxUnixTimestamp: finishTxUnixTimestamp,
+                        latency: (finishTxUnixTimestamp-sendTxUnixTimestamp),
+                        txData: txData,
+                        nNonZeroBytes: nNonZeroBytes,
+                        nZeroBytes: nZeroBytes
+                    });
+                })
+                .once('confirmation', function(confirmationNumber, result) {
+                    let msg = "";
+                    msg += `Sending transaction ${thisTransaction}/${nonce} for user ${user_idx} (${accountAddress}) at ${currentUnixTimestamp}\n`;
+                    msg += `SUCCESS:\n`;
+                    msg += `${JSON.stringify(result, null, 4)}`;
+                    console.log(msg);
+
+                    const finishTxUnixTimestamp = Math.floor(Date.now()/1000);
+                    report.data.push({
+                        idx: thisTransaction,
+                        status: "OK",
+                        creationUnixTimestamp: currentUnixTimestamp,
+                        lat: thisLat,
+                        long: thisLong,
+                        encryptedGpsData: encryptedGpsData,
+                        sendTxUnixTimestamp: sendTxUnixTimestamp,
+                        finishTxUnixTimestamp: finishTxUnixTimestamp,
+                        latency: (finishTxUnixTimestamp-sendTxUnixTimestamp),
+                        txData: txData,
+                        result: result,
+                        nNonZeroBytes: nNonZeroBytes,
+                        nZeroBytes: nZeroBytes
+                    });
+                });
+        }, configs.sendLocationPeriodInMiliseconds);
+    }, Math.random() * configs.sendLocationPeriodInMiliseconds);
+}());
+
+setInterval(function(){
+    const currentUnixTimestamp = Math.floor(Date.now()/1000);
+    console.log(`Saving report (${currentUnixTimestamp}.json)...`);
+    fs.writeFile(`./temp_reports/${currentUnixTimestamp}.json`, JSON.stringify(report, null, '\t'), 'utf-8', function(err) {
+        if(err) {
+            return console.log(err);
+        }
+    
+        console.log(`Report ${currentUnixTimestamp}.json saved`);
+    });
+}, 15000);
