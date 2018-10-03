@@ -1,6 +1,6 @@
 {
     "contractAddress": "0x0215B2eDa86dA2174Bc1171BC730A154381a8601",
-    "nUsers": 2,
+    "nUsers": 1,
     "sendLocationPeriodInMiliseconds": 3000,
     "minInitialLat": -23.603244,
     "minInitialLong": -46.679381,
