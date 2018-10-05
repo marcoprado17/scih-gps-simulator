@@ -26,7 +26,8 @@ const gpsHdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(configs.gpsMnemoni
     let length = await smartCarInsuranceContract.methods.getLengthOfGpsData(address).call();
     console.log(length);
     data = [];
-    for(let i = 25; i < length; i++) {
+    for(let i = 150; i < length; i++) {
+        console.log(i);
         let gpsData = await smartCarInsuranceContract.methods.gpsDataByUserAddress(address, i).call();
         data.push(gpsData);
     }

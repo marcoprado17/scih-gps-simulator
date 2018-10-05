@@ -3,3 +3,4 @@ ethereum/build/*
 !ethereum/build/.gitkeep
 secrets.json
 temp_reports/*.json
+generate_charts/.venv
