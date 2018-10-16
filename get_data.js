@@ -16,7 +16,8 @@ const provider = new HDWalletProvider(
 const myWeb3 = new Web3(provider);
 const smartCarInsuranceContract = new myWeb3.eth.Contract(JSON.parse(SmartCarInsuranceContract.interface), configs.contractAddress);
 
-const gpsHdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(configs.gpsMnemonic));
+const gpsHdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(secrets.gpsMnemonic));
+console.log("gpsHdwallet", gpsHdwallet);
 
 (async function(){
     const accounts = await myWeb3.eth.getAccounts();
@@ -26,7 +27,7 @@ const gpsHdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(configs.gpsMnemoni
     let length = await smartCarInsuranceContract.methods.getLengthOfGpsData(address).call();
     console.log(length);
     data = [];
-    for(let i = 150; i < length; i++) {
+    for(let i = 1248; i < 1261; i++) {
         console.log(i);
         let gpsData = await smartCarInsuranceContract.methods.gpsDataByUserAddress(address, i).call();
         data.push(gpsData);
@@ -36,7 +37,12 @@ const gpsHdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(configs.gpsMnemoni
     data.map((gpsData) => {
         const i = gpsData.creationUnixTimestamp-946684800;
         try {
+            console.log("child idx: ", i);
             const key = gpsHdwallet.deriveChild(i).getWallet().getPrivateKey();
+            console.log("key: ", key);
+            console.log("key.toString('hex'): ", key.toString('hex'));
+            let bufferFromHexString = new Buffer(key.toString('hex'), 'hex');
+            console.log("bufferFromHexString", bufferFromHexString);
             const decipher = crypto.createDecipher("aes256", key);
             let decrypted = decipher.update(gpsData.encryptedLatLong, 'hex', 'utf8');
             decrypted += decipher.final('utf8');
