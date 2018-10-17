@@ -1,7 +1,7 @@
 {
     "contractAddress": "0x8552a4F4f401357C7C426cc03A26E808532035c3",
-    "nProcess": 2,
-    "nUsersPerProcess": 5,
+    "nProcess": 8,
+    "nUsersPerProcess": 2,
     "sendLocationPeriodInMiliseconds": 1000,
     "minInitialLat": -23.603244,
     "minInitialLong": -46.679381,

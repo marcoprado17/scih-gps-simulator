@@ -36,10 +36,10 @@ for(let userIdx = firstUserIdx; userIdx <= lastUserIdx; userIdx++){
         let currentLong = configs.minInitialLong + (configs.maxInitialLong-configs.minInitialLong)*Math.random();
     
         // console.log(accountAddress);
-        console.log(privKeyBuffer.toString('hex'));
-        console.log(privKeyBuffer.toString('hex').length);
-        console.log(pubKeyBuffer.toString('hex'));
-        console.log(pubKeyBuffer.toString('hex').length);
+        // console.log(privKeyBuffer.toString('hex'));
+        // console.log(privKeyBuffer.toString('hex').length);
+        // console.log(pubKeyBuffer.toString('hex'));
+        // console.log(pubKeyBuffer.toString('hex').length);
 
         setTimeout(() => {
             setInterval( async () => {
@@ -72,17 +72,17 @@ for(let userIdx = firstUserIdx; userIdx <= lastUserIdx; userIdx++){
                 let dataHash = await ethereumjs.sha3(JSON.stringify(data));
                 let {v, r, s} = await ethereumjs.ecsign(new Buffer(dataHash), privKeyBuffer);
 
-                console.log("sig", {v, r, s});
+                // console.log("sig", {v, r, s});
 
                 // const {v, r, s} = await ethereumjs.fromRpcSig(sig);
                 // console.log(ethereumjs.isValidSignature(v, r, s));
                 const pubKey  = ethereumjs.ecrecover(ethereumjs.toBuffer(dataHash), v, r, s);
                 const addrBuf = ethereumjs.pubToAddress(pubKey);
                 const addr    = ethereumjs.bufferToHex(addrBuf);
-                console.log("accountAddress", accountAddress);
-                console.log("addr", addr);
+                // console.log("accountAddress", accountAddress);
+                // console.log("addr", addr);
 
-                axios.post(`http://localhost:8181/api/accounts/${accountAddress}/contracts/${configs.contractAddress}/gps-data`, {
+                axios.post(`http://35.239.45.68:81/api/accounts/${accountAddress}/contracts/${configs.contractAddress}/gps-data`, {
                     data,
                     v,
                     r,
@@ -90,10 +90,10 @@ for(let userIdx = firstUserIdx; userIdx <= lastUserIdx; userIdx++){
                     from: accountAddress
                 })
                 .then(function (response) {
-                    console.log("sucesso");
+                    // console.log("sucesso");
                 })
                 .catch(function (err) {
-                    console.error(err);
+                    // console.error(err);
                 });
             }, configs.sendLocationPeriodInMiliseconds);
         }, Math.random() * configs.sendLocationPeriodInMiliseconds);
