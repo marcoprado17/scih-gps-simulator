@@ -17,6 +17,8 @@ const lastUserIdx = firstUserIdx + nUsersPerProcess - 1;
 
 const gpsHdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(secrets.gpsMnemonic));
 
+let idx = 0;
+
 for(let userIdx = firstUserIdx; userIdx <= lastUserIdx; userIdx++){
     (async function(){
         const provider = new HDWalletProvider(
@@ -62,7 +64,7 @@ for(let userIdx = firstUserIdx; userIdx <= lastUserIdx; userIdx++){
                 let encryptedGpsData = cipher.update(JSON.stringify(latLongData),'utf8','hex');
                 encryptedGpsData += cipher.final('hex');
 
-                console.log("encryptedGpsData", encryptedGpsData);
+                // console.log("encryptedGpsData", encryptedGpsData);
 
                 let data = {
                     encryptedGpsData,
@@ -82,6 +84,16 @@ for(let userIdx = firstUserIdx; userIdx <= lastUserIdx; userIdx++){
                 // console.log("accountAddress", accountAddress);
                 // console.log("addr", addr);
 
+                let thisIdx = idx++;
+
+                let reportData = {
+                    thisIdx,
+                    accountAddress,
+                    encryptedGpsData,
+                    contractAddress: configs.contractAddress,
+                    startRequestUnixTimestampInMs: Math.floor(new Date()),
+                }
+
                 axios.post(`http://35.239.45.68:81/api/accounts/${accountAddress}/contracts/${configs.contractAddress}/gps-data`, {
                     data,
                     v,
@@ -90,10 +102,32 @@ for(let userIdx = firstUserIdx; userIdx <= lastUserIdx; userIdx++){
                     from: accountAddress
                 })
                 .then(function (response) {
-                    // console.log("sucesso");
+                    let latencyInMs = new Date() - reportData.startRequestUnixTimestampInMs;
+                    // console.log(response);
+                    console.log([
+                        reportData.thisIdx,
+                        reportData.startRequestUnixTimestampInMs,
+                        latencyInMs,
+                        response.status,
+                        "",
+                        reportData.accountAddress,
+                        reportData.encryptedGpsData,
+                        reportData.contractAddress,
+                    ].join(','))
                 })
                 .catch(function (err) {
-                    // console.error(err);
+                    let latencyInMs = new Date() - reportData.startRequestUnixTimestampInMs;
+                    console.log([
+                        reportData.thisIdx,
+                        reportData.startRequestUnixTimestampInMs,
+                        latencyInMs,
+                        "FALHOU",
+                        err.message,
+                        reportData.accountAddress,
+                        reportData.encryptedGpsData,
+                        reportData.contractAddress,
+                    ].join(','))
+                    // console.log(err);
                 });
             }, configs.sendLocationPeriodInMiliseconds);
         }, Math.random() * configs.sendLocationPeriodInMiliseconds);
