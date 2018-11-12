@@ -78,9 +78,9 @@ for(let userIdx = firstUserIdx; userIdx <= lastUserIdx; userIdx++){
 
                 // const {v, r, s} = await ethereumjs.fromRpcSig(sig);
                 // console.log(ethereumjs.isValidSignature(v, r, s));
-                const pubKey  = ethereumjs.ecrecover(ethereumjs.toBuffer(dataHash), v, r, s);
-                const addrBuf = ethereumjs.pubToAddress(pubKey);
-                const addr    = ethereumjs.bufferToHex(addrBuf);
+                // const pubKey  = ethereumjs.ecrecover(ethereumjs.toBuffer(dataHash), v, r, s);
+                // const addrBuf = ethereumjs.pubToAddress(pubKey);
+                // const addr    = ethereumjs.bufferToHex(addrBuf);
                 // console.log("accountAddress", accountAddress);
                 // console.log("addr", addr);
 

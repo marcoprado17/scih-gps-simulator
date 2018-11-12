@@ -28,11 +28,16 @@ def generate_plot(file_name, n_gps, x0):
             i += 1
 
         fig, ax = plt.subplots()
+        fig.set_size_inches(13.5, 9.5)
         ax.plot(x, y)
         # ax.set_ylim(0, 200000)
 
-        ax.set(xlabel='Indíce do Envio', ylabel='Latência em ms',
-            title='Latência da requisição de envio do sinal GPS ({} dispositivos)'.format(n_gps))
+        title='Latência da requisição de envio do sinal GPS ({} dispositivos)'.format(n_gps)
+
+        if file_name == 'without_sign_check':
+            title='Latência da requisição de envio do sinal GPS (Servidor não verifica a assinatura) ({} dispositivos)'.format(n_gps)
+
+        ax.set(xlabel='Indíce do Envio', ylabel='Latência em ms', title=title)
         ax.grid()
         ax.axhline(y=1000, color='#00ee00')
 
@@ -44,6 +49,7 @@ generate_plot('8x10', 80, 3050)
 generate_plot('8x11', 88, 8000)
 generate_plot('8x12', 96, 3500)
 generate_plot('8x15', 120, 3800)
+generate_plot('without_sign_check', 120, 9500)
 
 # def sort_key(elem):
 #     return elem["idx"]
